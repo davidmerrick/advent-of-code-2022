@@ -19,7 +19,7 @@ plugins {
 dependencies {
 
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("io.github.davidmerrick.aoc:advent-of-code-utils:1.0.3")
+    implementation("io.github.davidmerrick.aoc:advent-of-code-utils:1.0.4")
     implementation("com.fasterxml.jackson.core:jackson-core:2.14.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
     implementation("com.github.shiguruikai:combinatoricskt:1.6.0")
