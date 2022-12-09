@@ -48,7 +48,7 @@ class Day2Test {
 
     private fun parseLine(line: String): RockPaperScissorsGame {
         val split = line.trim().split(" ")
-        return RockPaperScissorsGame.parse(
+        return RockPaperScissorsGame.of(
             split[0].first(),
             split[1].first()
         )

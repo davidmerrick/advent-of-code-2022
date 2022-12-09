@@ -13,7 +13,7 @@ data class RockPaperScissorsGame(val opponent: Shape, val you: Shape) {
     }
 
     companion object {
-        fun parse(a: Char, b: Char) = RockPaperScissorsGame(
+        fun of(a: Char, b: Char) = RockPaperScissorsGame(
             ShapeResolver.resolve(a),
             ShapeResolver.resolve(b)
         )

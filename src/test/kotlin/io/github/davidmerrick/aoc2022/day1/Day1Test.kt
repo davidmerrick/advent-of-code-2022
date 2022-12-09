@@ -40,6 +40,6 @@ class Day1Test {
     private fun parseInput(fileName: String): List<Food> {
         return readText(this::class, fileName)
             .split("\n\n")
-            .map { Food.parse(it) }
+            .map { Food.of(it) }
     }
 }
