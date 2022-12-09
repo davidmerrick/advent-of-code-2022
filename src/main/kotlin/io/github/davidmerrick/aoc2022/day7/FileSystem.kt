@@ -28,6 +28,8 @@ class FileSystem(private val dirMap: Map<String, Directory>) {
         return dir.size!!
     }
 
+    // Todo: Directories CAN have non-unique names. So my map isn't going to work. May have to
+    // build this as an actual tree
     companion object {
 
         fun of(lines: List<String>): FileSystem {
