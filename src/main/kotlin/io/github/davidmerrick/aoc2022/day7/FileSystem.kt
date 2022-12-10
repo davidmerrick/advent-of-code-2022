@@ -4,11 +4,15 @@ class FileSystem(private val dirMap: Map<String, Directory>) {
 
     fun getDirectoriesWithMaxSize(n: Int) = getDirectoriesBy { it.size!! < n }
 
-    private fun getDirectoriesBy(predicate: (Directory) -> Boolean): List<Pair<String, Directory>> {
+    fun getDirectoriesBy(predicate: (Directory) -> Boolean): List<Pair<String, Directory>> {
         // Compute sizes of dirs
-        size("/")
+        size("")
 
         return dirMap.filter { predicate(it.value) }.toList()
+    }
+
+    fun totalUsed(): Int {
+        return size("")
     }
 
     /**
@@ -28,25 +32,30 @@ class FileSystem(private val dirMap: Map<String, Directory>) {
         return dir.size!!
     }
 
-    // Todo: Directories CAN have non-unique names. So my map isn't going to work. May have to
-    // build this as an actual tree
     companion object {
+
+        private fun getParent(cwd: String): String {
+            if (cwd == "/") return ""
+            return cwd.substring(0, cwd.lastIndexOf("/"))
+        }
 
         fun of(lines: List<String>): FileSystem {
             var i = 0
-            var curDir = ""
+            var cwd = ""
             return buildMap {
                 // We're only going to worry about lines with the $
                 while (i < lines.size) {
                     val split = lines[i].split(" ")
                     if (split[1] == "cd") {
-                        curDir = if (split[2] == "..") {
-                            this.getParent(curDir)
-                        } else split[2]
+                        cwd = when (split[2]) {
+                            ".." -> getParent(cwd)
+                            "/" -> ""
+                            else -> "$cwd/${split[2]}"
+                        }
                     } else if (split[1] == "ls") {
                         val contents = lines.subList(i + 1, lines.size)
                             .takeWhile { !it.startsWith("$") }
-                        this[curDir] = Directory.of(contents)
+                        this[cwd] = Directory.of(cwd, contents)
                         i += contents.size
                     }
                     i++
@@ -54,12 +63,4 @@ class FileSystem(private val dirMap: Map<String, Directory>) {
             }.let { FileSystem(it) }
         }
     }
-}
-
-private fun Map<String, Directory>.getParent(dirName: String): String {
-    if (dirName == "/") return "/"
-    return this
-        .asSequence()
-        .first { it.value.subDirs.contains(dirName) }
-        .let { it.key }
 }
