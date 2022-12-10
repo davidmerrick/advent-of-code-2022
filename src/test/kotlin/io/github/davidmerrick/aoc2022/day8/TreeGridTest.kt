@@ -17,4 +17,32 @@ internal class TreeGridTest {
         grid.isVisible(0, 4) shouldBe true
         grid.isVisible(4, 4) shouldBe true
     }
+
+    @Test
+    fun `Visibility count`() {
+        readLines(this::class, "example.txt")
+            .let { TreeGrid.of(it) }
+            .visibleCount shouldBe 21
+    }
+
+    @Test
+    fun `Scenic score`() {
+        readLines(this::class, "example.txt")
+            .let { TreeGrid.of(it) }
+            .scenicScore(1, 2) shouldBe 4
+    }
+
+    @Test
+    fun `Scenic score 2`() {
+        readLines(this::class, "example.txt")
+            .let { TreeGrid.of(it) }
+            .scenicScore(3, 2) shouldBe 8
+    }
+
+    @Test
+    fun `Max scenic score`() {
+        readLines(this::class, "example.txt")
+            .let { TreeGrid.of(it) }
+            .maxScenicScore() shouldBe 8
+    }
 }
