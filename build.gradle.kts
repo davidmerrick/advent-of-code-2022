@@ -13,7 +13,7 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.7.22"
 }
 
 dependencies {
@@ -48,5 +48,36 @@ tasks {
 
     test {
         useJUnitPlatform()
+    }
+
+    register("newDay") {
+        description = "Creates folders and boilerplate for new AOC day"
+
+        doLast {
+            println("Making a new day \uD83C\uDF1E")
+            val groupDirectory = project.group.toString().replace(".", "/")
+            val dayValue = File("${rootDir.path}/src/test/kotlin/$groupDirectory")
+                .list()
+                .filter { it.startsWith("day") }
+                .map { it.replace("day", "") }
+                .maxOf { it.toInt() }
+                .let { it + 1 }
+
+            val dayDirName = "day$dayValue"
+
+            // Create directories
+            listOf(
+                "${rootDir.path}/src/test/kotlin/$groupDirectory/$dayDirName",
+                "${rootDir.path}/src/test/resources/$groupDirectory/$dayDirName",
+                "${rootDir.path}/src/main/kotlin/$groupDirectory/$dayDirName",
+            ).forEach { mkdir(it) }
+
+            // Create files
+            File("${rootDir.path}/src/test/resources/$groupDirectory/$dayDirName/$dayDirName.txt").createNewFile()
+            File("${rootDir.path}/src/test/resources/$groupDirectory/$dayDirName/example.txt").createNewFile()
+
+            File("${rootDir.path}/src/test/kotlin/$groupDirectory/template/DayTest.kt")
+                .copyTo(File("${rootDir.path}/src/test/kotlin/$groupDirectory/$dayDirName/Day${dayValue}Test.kt"))
+        }
     }
 }
