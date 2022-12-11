@@ -51,17 +51,21 @@ tasks {
     }
 
     register("newDay") {
+        group = "advent"
         description = "Creates folders and boilerplate for new AOC day"
 
         doLast {
-            println("Making a new day \uD83C\uDF1E")
             val groupDirectory = project.group.toString().replace(".", "/")
+
+            // Compute the integer value for the next day
             val dayValue = File("${rootDir.path}/src/test/kotlin/$groupDirectory")
                 .list()
                 .filter { it.startsWith("day") }
                 .map { it.replace("day", "") }
                 .maxOf { it.toInt() }
                 .let { it + 1 }
+
+            println("Preparing day $dayValue \uD83C\uDF1E")
 
             val dayDirName = "day$dayValue"
 
