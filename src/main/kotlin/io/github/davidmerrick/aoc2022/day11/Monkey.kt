@@ -2,25 +2,17 @@ package io.github.davidmerrick.aoc2022.day11
 
 data class Monkey(
     val id: Int,
-    val items: MutableList<ULong>,
-    val operation: Operation,
+    val items: MutableList<Long>,
+    val operation: (Long) -> Long,
     val test: Test
 ) {
-    private var _inspectedCount = 0UL
+    private var _inspectedCount = 0L
     val inspectedCount
         get() = _inspectedCount
 
-    fun inspect(item: ULong): ULong {
-        _inspectedCount += 1UL
-        val a = if (operation.a == "old") item else operation.a.toULong()
-        val b = if (operation.b == "old") item else operation.b.toULong()
-        return when (operation.operator) {
-            "+" -> a + b
-            "-" -> a - b
-            "*" -> a * b
-            "/" -> a / b
-            else -> throw RuntimeException("Invalid operator ${operation.operator}")
-        }
+    fun inspect(item: Long): Long {
+        _inspectedCount++
+        return operation(item)
     }
 
     companion object {
@@ -35,34 +27,33 @@ data class Monkey(
             )
         }
 
-        private fun parseItems(lines: List<String>): MutableList<ULong> {
+        private fun parseItems(lines: List<String>): MutableList<Long> {
             return lines[1]
                 .trim()
                 .replace("Starting items: ", "")
                 .split(", ")
-                .map { it.toULong() }
+                .map { it.toLong() }
                 .toMutableList()
         }
 
         private fun parseTest(lines: List<String>): Test {
-            // Relevant values are all at the end, so just grab those
-            val values = lines.takeLast(3)
+            val (divisibleBy, ifTrue, ifFalse) = lines.takeLast(3)
                 .map { it.trim() }
                 .map { it.split(" ").last().toInt() }
-            return Test(values[0].toULong(), values[1], values[2])
+            return Test(divisibleBy, ifTrue, ifFalse)
         }
 
-        private fun parseOperation(lines: List<String>): Operation {
-            val split = lines[2]
+        private fun parseOperation(lines: List<String>): (Long) -> Long {
+            val (a, operator, b) = lines[2]
                 .trim()
                 .replace("Operation: ", "")
                 .split(" = ")[1]
                 .split(" ")
-            return Operation(
-                a = split[0],
-                b = split[2],
-                operator = split[1]
-            )
+            return when (operator) {
+                "+" -> { old -> (a.toLongOrNull() ?: old) + (b.toLongOrNull() ?: old) }
+                "*" -> { old -> (a.toLongOrNull() ?: old) * (b.toLongOrNull() ?: old) }
+                else -> error(operator)
+            }
         }
 
         private fun parseId(lines: List<String>): Int {
@@ -72,13 +63,7 @@ data class Monkey(
 }
 
 data class Test(
-    val divisibleBy: ULong,
+    val divisibleBy: Int,
     val ifTrue: Int,
     val ifFalse: Int
-)
-
-data class Operation(
-    val a: String,
-    val b: String,
-    val operator: String
 )

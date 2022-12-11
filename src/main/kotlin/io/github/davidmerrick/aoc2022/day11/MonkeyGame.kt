@@ -4,12 +4,12 @@ import kotlin.math.floor
 
 class MonkeyGame(
     private val monkeys: MutableList<Monkey>,
-    private val worryModifier: (ULong) -> ULong = { floor(it.toDouble() / 3).toULong() }
+    private val worryModifier: (Long) -> Long = { floor(it.toDouble() / 3).toLong() }
 ) {
     val inspectedCounts
         get() = monkeys.map { it.id to it.inspectedCount }
 
-    val monkeyBusiness: ULong
+    val monkeyBusiness: Long
         get() = monkeys
             .map { it.inspectedCount }
             .sortedByDescending { it }
@@ -31,7 +31,7 @@ class MonkeyGame(
 
                 // Test and throw
                 with(monkey.test) {
-                    val destination = if (newValue % divisibleBy == 0UL) {
+                    val destination = if (newValue % divisibleBy.toLong() == 0L) {
                         ifTrue
                     } else ifFalse
 
@@ -41,7 +41,7 @@ class MonkeyGame(
         }
     }
 
-    private fun throwTo(id: Int, value: ULong) {
+    private fun throwTo(id: Int, value: Long) {
         monkeys.first { it.id == id }.items.add(value)
     }
 }

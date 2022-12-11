@@ -20,7 +20,6 @@ internal class MonkeyTest {
         )
         monkey.id shouldBe 1
         monkey.items shouldContainAll listOf(54, 65, 75, 74)
-        monkey.operation shouldBe Operation("old", "6", "+")
-        monkey.test shouldBe Test(19UL, 2, 0)
+        monkey.test shouldBe Test(19, 2, 0)
     }
 }
