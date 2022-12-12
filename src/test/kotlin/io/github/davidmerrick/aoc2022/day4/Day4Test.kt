@@ -1,7 +1,7 @@
 package io.github.davidmerrick.aoc2022.day4
 
+import io.github.davidmerrick.aoc.collections.filterNotEmpty
 import io.github.davidmerrick.aoc.util.TestUtil.readLines
-import io.github.davidmerrick.aoc.util.filterNotEmpty
 import io.kotlintest.shouldBe
 import org.junit.jupiter.api.Test
 

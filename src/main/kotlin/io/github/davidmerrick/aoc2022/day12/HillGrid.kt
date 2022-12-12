@@ -34,11 +34,11 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
         }
     }
 
-    private fun distinctPaths(source: Pos, dest: Pos): Long {
+    private fun shortestPath(source: Pos, dest: Pos): Long {
         if (source == dest) return 1L
 
         if (!visited.containsKey(source)) {
-            visited[source] = nodes[source]!!.sumOf { distinctPaths(it, dest) }
+            visited[source] = nodes[source]!!.sumOf { shortestPath(it, dest) }
         }
 
         return visited[source]!!
@@ -49,6 +49,13 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
             return HillGrid(parseTable(lines.toCharRows()))
         }
 
-        private val elevationMap = ('a'..'z').mapIndexed { i, value -> value to i }.toMap()
+        private val elevationMap by lazy {
+            val eMap = ('a'..'z').mapIndexed { i, value -> value to i }
+                .toMap()
+                .toMutableMap()
+            eMap['S'] = 0
+            eMap['E'] = 26
+            eMap
+        }
     }
 }
