@@ -1,11 +1,11 @@
 package io.github.davidmerrick.aoc2022.day8
 
 import com.google.common.collect.HashBasedTable
+import io.github.davidmerrick.aoc.collections.toIntRows
 import io.github.davidmerrick.aoc.guava.asSequence
 import io.github.davidmerrick.aoc.guava.columnRange
 import io.github.davidmerrick.aoc.guava.parseTable
 import io.github.davidmerrick.aoc.guava.rowRange
-import io.github.davidmerrick.aoc.util.mapToInts
 import io.github.davidmerrick.aoc.util.product
 
 class TreeGrid(private val table: HashBasedTable<Int, Int, Int>) {
@@ -60,6 +60,6 @@ class TreeGrid(private val table: HashBasedTable<Int, Int, Int>) {
     }
 
     companion object {
-        fun of(lines: List<String>) = TreeGrid(parseTable(lines.mapToInts()))
+        fun of(lines: List<String>) = TreeGrid(parseTable(lines.toIntRows()))
     }
 }
