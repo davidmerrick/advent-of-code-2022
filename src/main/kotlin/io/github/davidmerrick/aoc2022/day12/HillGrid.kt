@@ -4,68 +4,50 @@ import com.google.common.collect.HashBasedTable
 import io.github.davidmerrick.aoc.collections.toCharRows
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.guava.asSequence
+import io.github.davidmerrick.aoc.guava.getEntry
 import io.github.davidmerrick.aoc.guava.getNeighbors
 import io.github.davidmerrick.aoc.guava.parseTable
 import io.github.davidmerrick.aoc.guava.pos
 
 class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
 
-    // Map of possible steps from each location
-    private val adjacencyMap: Map<Pos, Set<Pos>>
-
-    init {
-        // Compute possible steps from each location
-        adjacencyMap = buildMap {
-            table.asSequence()
-                .map { Pos(it.column, it.row) }
-                .forEach { this[it] = getPossibleSteps(it) }
-        }
-    }
-
-    private fun getStart(): Pos {
-        return table.asSequence()
-            .first { it.value == 'S' }
-            .pos()
-    }
-
-    private fun getEnd(): Pos {
-        return table.asSequence()
-            .first { it.value == 'E' }
-            .pos()
-    }
-
-    private fun getPossibleSteps(pos: Pos): Set<Pos> {
+    private fun getAdjacent(pos: Pos): Set<Pos> {
         val value = table.get(pos.y, pos.x)
         return buildSet {
-            table.getNeighbors(pos)
-                .forEach {
-                    if (elevationMap[it.value]!! <= elevationMap[value]!! + 1) {
-                        add(Pos(it.column, it.row))
-                    }
+            table.getNeighbors(pos).forEach {
+                if (elevationMap[it.value]!! <= elevationMap[value]!! + 1) {
+                    add(Pos(it.column, it.row))
                 }
+            }
         }
     }
 
     /**
      * Use BFS to find the shortest path
      */
-    private fun shortestPath(source: Pos, dest: Pos): Long {
-        val visited: MutableMap<Pos, Long> = mutableMapOf()
-        val end = getEnd()
+    fun shortestPath(
+        sourcePredicate: (Char) -> Boolean, destinationPredicate: (Char) -> Boolean
+    ): Int {
+        val visited = mutableSetOf<Pos>()
+        val start = table.asSequence().first { sourcePredicate(it.value) }.pos().let { Step(it, 0) }
 
-        val queue = ArrayDeque<Pos>()
-        queue.add(getStart())
+        val queue = ArrayDeque<Step>().apply { add(start) }
 
-        while (!queue.isEmpty()) {
-            val currentNode = queue.removeFirst()
+        while (queue.isNotEmpty()) {
+            val step = queue.removeFirst()
+            visited.add(step.pos)
 
-            if (currentNode == end) {
-                break
+            if (destinationPredicate(table.getEntry(step.pos)!!.value)) {
+                return step.distance
             } else {
-                queue.addAll(adjacencyMap[currentNode]!!)
+                getAdjacent(step.pos)
+                    .filterNot { visited.contains(it) }
+                    .map { step.toward(it) }
+                    .forEach { queue.addLast(it) }
             }
         }
 
+        error("No path found matching predicate")
     }
 
     companion object {
@@ -73,13 +55,19 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
             return HillGrid(parseTable(lines.toCharRows()))
         }
 
-        private val elevationMap by lazy {
-            val eMap = ('a'..'z').mapIndexed { i, value -> value to i }
-                .toMap()
-                .toMutableMap()
-            eMap['S'] = 0
-            eMap['E'] = 26
-            eMap
-        }
+        private val elevationMap = ('a'..'z').mapIndexed { i, value -> value to i }
+            .toMap()
+            .toMutableMap()
+            .apply {
+                put('S', 0)
+                put('E', 26)
+            }
     }
+}
+
+data class Step(
+    val pos: Pos, val
+    distance: Int
+) {
+    fun toward(pos: Pos) = this.copy(pos = pos, distance = distance + 1)
 }
