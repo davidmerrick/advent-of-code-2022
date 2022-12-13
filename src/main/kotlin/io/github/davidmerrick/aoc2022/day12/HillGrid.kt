@@ -11,11 +11,11 @@ import io.github.davidmerrick.aoc.guava.pos
 
 class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
 
-    private fun getAdjacent(pos: Pos): Set<Pos> {
-        val value = table.get(pos.y, pos.x)
+    private fun getAdjacent(pos: Pos, adjacentIf: (Char, Char) -> Boolean): Set<Pos> {
+        val value = table.get(pos.y, pos.x)!!
         return buildSet {
             table.getNeighbors(pos).forEach {
-                if (elevationMap[it.value]!! <= elevationMap[value]!! + 1) {
+                if (adjacentIf(value, it.value)) {
                     add(Pos(it.column, it.row))
                 }
             }
@@ -26,24 +26,31 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
      * Use BFS to find the shortest path
      */
     fun shortestPath(
-        sourcePredicate: (Char) -> Boolean, destinationPredicate: (Char) -> Boolean
+        sourcePredicate: (Char) -> Boolean,
+        destinationPredicate: (Char) -> Boolean,
+        isAdjacent: (Char, Char) -> Boolean = { node, neighbor -> neighbor.elevation() <= node.elevation() + 1 }
     ): Int {
         val visited = mutableSetOf<Pos>()
-        val start = table.asSequence().first { sourcePredicate(it.value) }.pos().let { Step(it, 0) }
+        val start = table.asSequence().first { sourcePredicate(it.value) }
+            .pos()
+            .let { Step(it, 0) }
 
         val queue = ArrayDeque<Step>().apply { add(start) }
+        visited.add(start.pos)
 
         while (queue.isNotEmpty()) {
             val step = queue.removeFirst()
-            visited.add(step.pos)
 
             if (destinationPredicate(table.getEntry(step.pos)!!.value)) {
                 return step.distance
             } else {
-                getAdjacent(step.pos)
-                    .filterNot { visited.contains(it) }
+                getAdjacent(step.pos, isAdjacent)
+                    .filterNot { it in visited }
                     .map { step.toward(it) }
-                    .forEach { queue.addLast(it) }
+                    .forEach {
+                        queue.addLast(it)
+                        visited.add(it.pos)
+                    }
             }
         }
 
@@ -54,16 +61,18 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
         fun of(lines: List<String>): HillGrid {
             return HillGrid(parseTable(lines.toCharRows()))
         }
-
-        private val elevationMap = ('a'..'z').mapIndexed { i, value -> value to i }
-            .toMap()
-            .toMutableMap()
-            .apply {
-                put('S', 0)
-                put('E', 26)
-            }
     }
 }
+
+private val elevations = ('a'..'z').mapIndexed { i, value -> value to i }
+    .toMap()
+    .toMutableMap()
+    .apply {
+        put('S', 0)
+        put('E', 26)
+    }
+
+fun Char.elevation() = elevations[this]!!
 
 data class Step(
     val pos: Pos, val
