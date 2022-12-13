@@ -6,20 +6,32 @@ import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.guava.asSequence
 import io.github.davidmerrick.aoc.guava.getNeighbors
 import io.github.davidmerrick.aoc.guava.parseTable
+import io.github.davidmerrick.aoc.guava.pos
 
 class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
 
     // Map of possible steps from each location
-    private val nodes: Map<Pos, Set<Pos>>
-    private val visited: MutableMap<Pos, Long> = mutableMapOf()
+    private val adjacencyMap: Map<Pos, Set<Pos>>
 
     init {
         // Compute possible steps from each location
-        nodes = buildMap {
+        adjacencyMap = buildMap {
             table.asSequence()
                 .map { Pos(it.column, it.row) }
                 .forEach { this[it] = getPossibleSteps(it) }
         }
+    }
+
+    private fun getStart(): Pos {
+        return table.asSequence()
+            .first { it.value == 'S' }
+            .pos()
+    }
+
+    private fun getEnd(): Pos {
+        return table.asSequence()
+            .first { it.value == 'E' }
+            .pos()
     }
 
     private fun getPossibleSteps(pos: Pos): Set<Pos> {
@@ -34,14 +46,26 @@ class HillGrid(private val table: HashBasedTable<Int, Int, Char>) {
         }
     }
 
+    /**
+     * Use BFS to find the shortest path
+     */
     private fun shortestPath(source: Pos, dest: Pos): Long {
-        if (source == dest) return 1L
+        val visited: MutableMap<Pos, Long> = mutableMapOf()
+        val end = getEnd()
 
-        if (!visited.containsKey(source)) {
-            visited[source] = nodes[source]!!.sumOf { shortestPath(it, dest) }
+        val queue = ArrayDeque<Pos>()
+        queue.add(getStart())
+
+        while (!queue.isEmpty()) {
+            val currentNode = queue.removeFirst()
+
+            if (currentNode == end) {
+                break
+            } else {
+                queue.addAll(adjacencyMap[currentNode]!!)
+            }
         }
 
-        return visited[source]!!
     }
 
     companion object {
