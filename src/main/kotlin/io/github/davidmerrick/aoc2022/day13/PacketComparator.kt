@@ -2,12 +2,7 @@ package io.github.davidmerrick.aoc2022.day13
 
 import java.util.Stack
 
-data class PacketComparator(
-    private val packetA: String? = null,
-    private val packetB: String? = null
-    ) : Comparator<String> {
-    fun isInOrder() = compare(packetA!!, packetB!!) == -1
-
+object PacketComparator : Comparator<String> {
     /**
      * Recursive compare.
      * Returns -1 if a is less than b
@@ -40,50 +35,46 @@ data class PacketComparator(
         error("Unhandled case")
     }
 
-    companion object {
-        fun of(lines: List<String>) = PacketComparator(lines.first(), lines.last())
+    /**
+     * Splits the list into the top-level items
+     * i.e. "[1,1], 2, 3" would become listOf("[1,1]", "2", "3")
+     */
+    fun splitList(str: String): List<String> {
+        require(str.isList())
+        val sanitized = str.trimBrackets()
 
-        /**
-         * Splits the list into the top-level items
-         * i.e. "[1,1], 2, 3" would become listOf("[1,1]", "2", "3")
-         */
-        fun splitList(str: String): List<String> {
-            require(str.isList())
-            val sanitized = str.trimBrackets()
+        // For balancing parens
+        val bracketStack = Stack<Char>()
 
-            // For balancing parens
-            val bracketStack = Stack<Char>()
+        var i = 0
+        val items = mutableListOf<String>()
+        val builder = StringBuilder()
+        while (i < sanitized.length) {
+            val cur = sanitized[i]
+            if (cur == ',' && bracketStack.isEmpty()) {
+                i++
+                continue
+            }
+            builder.append(cur)
+            if (cur == '[') bracketStack.push(cur)
+            if (cur == ']') bracketStack.pop()
 
-            var i = 0
-            val items = mutableListOf<String>()
-            val builder = StringBuilder()
-            while (i < sanitized.length) {
-                val cur = sanitized[i]
-                if (cur == ',' && bracketStack.isEmpty()) {
+            // Peek to see if there's more to read
+            if (i + 1 < sanitized.length) {
+                if (sanitized[i + 1].isDigit()) {
                     i++
                     continue
                 }
-                builder.append(cur)
-                if (cur == '[') bracketStack.push(cur)
-                if (cur == ']') bracketStack.pop()
-
-                // Peek to see if there's more to read
-                if (i + 1 < sanitized.length) {
-                    if (sanitized[i + 1].isDigit()) {
-                        i++
-                        continue
-                    }
-                }
-
-                if (bracketStack.isEmpty()) {
-                    items.add(builder.toString())
-                    builder.clear()
-                }
-                i++
             }
 
-            return items
+            if (bracketStack.isEmpty()) {
+                items.add(builder.toString())
+                builder.clear()
+            }
+            i++
         }
+
+        return items
     }
 }
 

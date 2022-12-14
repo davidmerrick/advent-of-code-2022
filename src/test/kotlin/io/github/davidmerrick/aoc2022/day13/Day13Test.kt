@@ -16,17 +16,17 @@ class Day13Test {
         readText(this::class, "example.txt")
             .split("\n\n")
             .map { it.split("\n") }
-            .mapIndexed { i, str -> i + 1 to PacketComparator.of(str).isInOrder() }
+            .mapIndexed { i, str -> i + 1 to PacketPair.of(str).isInOrder() }
             .filter { it.second }
             .sumOf { it.first } shouldBe 13
     }
 
     @Test
     fun `Part 1`() {
-        val sum = readText(this::class, "day13.txt")
+        readText(this::class, "day13.txt")
             .split("\n\n")
             .map { it.split("\n") }
-            .mapIndexed { i, str -> i + 1 to PacketComparator.of(str).isInOrder() }
+            .mapIndexed { i, str -> i + 1 to PacketPair.of(str).isInOrder() }
             .filter { it.second }
             .sumOf { it.first }
             .let { println(it) }
@@ -34,7 +34,6 @@ class Day13Test {
 
     @Test
     fun `Part 2 example`() {
-        val packetPair = PacketComparator()
         readText(this::class, "example.txt")
             .split("\n")
             .filterNotEmpty()
@@ -42,7 +41,7 @@ class Day13Test {
                 add(DECODER_ONE)
                 add(DECODER_TWO)
             }
-            .sortedWith(packetPair)
+            .sortedWith(PacketComparator)
             .mapIndexed { i, value -> i + 1 to value }
             .filter { it.second == DECODER_ONE || it.second == DECODER_TWO }
             .map { it.first }
@@ -51,7 +50,6 @@ class Day13Test {
 
     @Test
     fun `Part 2 full`() {
-        val packetPair = PacketComparator()
         readText(this::class, "day13.txt")
             .split("\n")
             .filterNotEmpty()
@@ -59,7 +57,7 @@ class Day13Test {
                 add(DECODER_ONE)
                 add(DECODER_TWO)
             }
-            .sortedWith(packetPair)
+            .sortedWith(PacketComparator)
             .mapIndexed { i, value -> i + 1 to value }
             .filter { it.second == DECODER_ONE || it.second == DECODER_TWO }
             .map { it.first }
