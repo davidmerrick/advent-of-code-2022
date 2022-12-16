@@ -3,20 +3,38 @@ package io.github.davidmerrick.aoc2022.day14
 import com.google.common.collect.HashBasedTable
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.coordinates.Range
-import io.github.davidmerrick.aoc.guava.*
+import io.github.davidmerrick.aoc.guava.asSequence
+import io.github.davidmerrick.aoc.guava.fillEmpty
+import io.github.davidmerrick.aoc.guava.lookup
+import io.github.davidmerrick.aoc.guava.print
+import io.github.davidmerrick.aoc.guava.put
+import io.github.davidmerrick.aoc2022.day14.SpaceType.AIR
+import io.github.davidmerrick.aoc2022.day14.SpaceType.ROCK
+import io.github.davidmerrick.aoc2022.day14.SpaceType.SAND
 
-class SandGridPart2(private val table: HashBasedTable<Int, Int, SpaceType>) {
+class SandGridPart2(
+    rockPositions: List<Pos>,
+    floorModifier: Int?
+) {
+    private val table: HashBasedTable<Int, Int, SpaceType> = HashBasedTable.create()
+    private val floor: Int?
+
+    init {
+        rockPositions.forEach { table.put(it, ROCK) }
+        floor = floorModifier?.let { rockPositions.maxOf(Pos::y) + it }
+    }
 
     // Flips to false when sand falls off until infinity
     private var canPourSand = true
-    private val floor = table.asSequence().maxOf { it.row } + 2
-
+    val sandCount
+        get() = table.asSequence().count { it.value == SAND }
 
     fun print(): String {
+        padTable()
         return table.print {
             when (it) {
-                SpaceType.SAND -> "o"
-                SpaceType.ROCK -> "#"
+                SAND -> "o"
+                ROCK -> "#"
                 else -> "."
             }
         }
@@ -26,9 +44,8 @@ class SandGridPart2(private val table: HashBasedTable<Int, Int, SpaceType>) {
      * Pours sand until no more can be poured
      * Then returns the count
      */
-    fun pourSand(): Int {
+    fun pourSand() {
         while (canPourSand) pourGrain()
-        return table.asSequence().count { it.value == SpaceType.SAND }
     }
 
     private fun pourGrain() {
@@ -37,13 +54,13 @@ class SandGridPart2(private val table: HashBasedTable<Int, Int, SpaceType>) {
             val nextPos = nextSandPos(sandPos)
             if (nextPos == sandPos) {
                 // Sand has come to rest
-                table.put(nextPos, SpaceType.SAND)
+                table.put(nextPos, SAND)
                 if (sandPos == sandEntryPoint) {
                     canPourSand = false
                 }
                 return
             }
-            sandPos = nextPos!!
+            sandPos = nextPos
         }
     }
 
@@ -53,49 +70,48 @@ class SandGridPart2(private val table: HashBasedTable<Int, Int, SpaceType>) {
      * If the sand falls into the ether, returns null
      */
     private fun nextSandPos(sandPos: Pos): Pos {
-        listOf(
+        return listOf(
             sandPos.copy(y = sandPos.y + 1),
             sandPos.copy(x = sandPos.x - 1, y = sandPos.y + 1),
             sandPos.copy(x = sandPos.x + 1, y = sandPos.y + 1)
-        ).forEach {
-            if (it.y >= floor) return sandPos
-            if ((table.lookup(it) ?: SpaceType.AIR) == SpaceType.AIR) return it
+        ).firstOrNull { get(it) == AIR } ?: sandPos
+    }
+
+    private fun get(pos: Pos): SpaceType {
+        floor?.let {
+            if (pos.y >= it) return ROCK
         }
-        return sandPos
+        return table.lookup(pos) ?: AIR
+    }
+
+    /**
+     * Pads the table with air so it can be printed
+     */
+    private fun padTable() {
+        val minPos = Pos(
+            table.asSequence().minOf { it.column } - 1,
+            table.asSequence().minOf { it.row } - 1
+        )
+        val maxPos = Pos(
+            table.asSequence().maxOf { it.column } + 1,
+            table.asSequence().maxOf { it.row } + 1
+        )
+        table.fillEmpty(minPos, maxPos, AIR)
     }
 
     companion object {
-        fun of(lines: List<String>): SandGridPart2 {
-            val table = HashBasedTable.create<Int, Int, SpaceType>()
-            val positions = lines.flatMap { parseRanges(it) }
+        fun of(lines: List<String>, floorModifier: Int? = null): SandGridPart2 {
+            val rockPositions = lines.flatMap { parseRanges(it) }
                 .flatMap { it.positions }
                 .toMutableList()
                 .apply { add(sandEntryPoint) }
-            table.fill(getFillRange(positions), SpaceType.AIR)
-            positions
-                .forEach { table.put(it, SpaceType.ROCK) }
-            return SandGridPart2(table)
+
+            return SandGridPart2(rockPositions, floorModifier)
         }
 
         private fun parseRanges(line: String) = line.split(" -> ")
             .map { Pos.of(it) }
             .windowed(2)
             .map { Range(it.first(), it.last()) }
-
-        /**
-         * Gets the range of table to fill
-         * with a buffer
-         */
-        private fun getFillRange(positions: List<Pos>): Range {
-            val minPos = Pos(
-                positions.minOf { it.x } - 1,
-                positions.minOf { it.y } - 1
-            )
-            val maxPos = Pos(
-                positions.maxOf { it.x } + 1,
-                positions.maxOf { it.y } + 1
-            )
-            return Range(minPos, maxPos)
-        }
     }
 }

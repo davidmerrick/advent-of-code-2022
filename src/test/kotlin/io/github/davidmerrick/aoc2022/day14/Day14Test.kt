@@ -16,12 +16,20 @@ class Day14Test {
 
     @Test
     fun `Part 2 example`() {
-        // Todo: Need to allow sand to flow into empty cells in table
-
         val sandGrid = TestUtil.readLines(this::class, "example.txt")
-            .let { SandGridPart2.of(it) }
+            .let { SandGridPart2.of(it, 2) }
 
-        sandGrid.pourSand() shouldBe 93
+        sandGrid.pourSand()
         print(sandGrid.print())
+        sandGrid.sandCount shouldBe 93
+    }
+
+    @Test
+    fun `Part 2 full`() {
+        val sandGrid = TestUtil.readLines(this::class, "day14.txt")
+            .let { SandGridPart2.of(it, 2) }
+
+        sandGrid.pourSand()
+        println(sandGrid.sandCount)
     }
 }
