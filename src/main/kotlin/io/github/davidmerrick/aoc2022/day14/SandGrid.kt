@@ -77,7 +77,7 @@ class SandGrid(private val table: HashBasedTable<Int, Int, SpaceType>) {
         fun of(lines: List<String>): SandGrid {
             val table = HashBasedTable.create<Int, Int, SpaceType>()
             val positions = lines.flatMap { parseRanges(it) }
-                .flatMap { it.positions }
+                .flatMap { it.positions() }
                 .toMutableList()
                 .apply { add(sandEntryPoint) }
             table.fill(getFillRange(positions), AIR)
