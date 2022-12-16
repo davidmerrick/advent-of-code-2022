@@ -16,11 +16,26 @@ class Day15Test {
 
     @Test
     fun `Part 1`() {
-        // Todo: 4668614 is too low
         readLines(this::class, "day15.txt")
             .map { SensorContext.of(it) }
             .let { SensorGrid(it) }
-            .countNonBeaconPositions(2_000_000)
+            .countNonBeaconPositions(2_000_000) shouldBe 5_878_678
+    }
+
+    @Test
+    fun `Part 2 example`() {
+        readLines(this::class, "example.txt")
+            .map { SensorContext.of(it) }
+            .let { SensorGrid(it) }
+            .tuningFrequency(0, 20) shouldBe 56_000_011L
+    }
+
+    @Test
+    fun `Part 2`() {
+        readLines(this::class, "day15.txt")
+            .map { SensorContext.of(it) }
+            .let { SensorGrid(it) }
+            .tuningFrequency(0, 4_000_000)
             .let { println(it) }
     }
 }
