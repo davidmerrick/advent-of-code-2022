@@ -2,25 +2,15 @@ package io.github.davidmerrick.aoc2022.day15
 
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.coordinates.Range
-import io.github.davidmerrick.aoc.coordinates.manhattanDistance
-import io.github.davidmerrick.aoc2022.day15.DeviceType.SENSOR
 
-class SensorGrid(input: List<SensorContext>) {
-
-    private val beaconDistances: Map<Pos, Int>
-    private val devices: Set<Device>
-
-    init {
-        beaconDistances = input.associate { it.sensor.position to it.distanceToBeacon }
-        devices = input.flatMap { listOf(it.sensor, it.closestBeacon) }.toSet()
-    }
+class SensorGrid(private val sensors: Set<Sensor>) {
 
     /**
      * Computes min row position that needs to be checked for beacons
      */
     private fun computeMinRowPosition(row: Int): Pos {
-        return devices.filter { it.type == SENSOR }
-            .minOf { it.position.x - beaconDistances[it.position]!! }
+        return sensors
+            .minOf { it.position.x - it.beaconDistance }
             .let { Pos(it, row) }
     }
 
@@ -28,28 +18,36 @@ class SensorGrid(input: List<SensorContext>) {
      * Computes max row position that needs to be checked for beacons
      */
     private fun computeMaxRowPosition(row: Int): Pos {
-        return devices.filter { it.type == SENSOR }
-            .maxOf { it.position.x + beaconDistances[it.position]!! }
+        return sensors
+            .maxOf { it.position.x + it.beaconDistance }
             .let { Pos(it, row) }
     }
 
-    fun tuningFrequency(minXY: Int, maxXY: Int): Long {
-        return Range(Pos(minXY, minXY), Pos(maxXY, maxXY))
-            .boxify()
-            .filterNot { it in devices.map(Device::position) }
-            .first { !cannotHaveBeacon(it) }
-            .let { it.x.toLong() * 4_000_000L + it.y.toLong() }
+    fun tuningFrequency(caveSize: Int): Long {
+        // Todo: Start with the sensors
+        // Use them plus distance, constrained by the cavesize, to generate a set of possible ranges
+
+        val cave = (0..caveSize)
+        return sensors().firstNotNullOf { sensor ->
+            val up = Pos(sensor.position.x, sensor.position.y - sensor - 1)
+            val down = Pos(sensor.position.x, sensor.position.y + sensor.distance + 1)
+            val left = Pos(sensor.position.x - sensor.distance - 1, sensor.position.y)
+            val right = Pos(sensor.position.x + sensor.distance + 1, sensor.position.y)
+
+            (up.lineTo(right) + right.lineTo(down) + down.lineTo(left) + left.lineTo(up))
+                .filter { it.x in cave && it.y in cave }
+                .firstOrNull { candidate -> sensors.none { sensor -> sensor.isInRange(candidate) } }
+        }.tuningFrequency()
+
     }
 
     fun countNonBeaconPositions(row: Int): Int {
         return Range(computeMinRowPosition(row), computeMaxRowPosition(row))
             .boxify(minY = row, maxY = row)
-            .filterNot { it in devices.map(Device::position) }
+            .filterNot { it in sensors.map(Sensor::position) }
             .filter { it.y == row }
-            .count { cannotHaveBeacon(it) }
-    }
-
-    private fun cannotHaveBeacon(pos: Pos): Boolean {
-        return beaconDistances.any { it.key.manhattanDistance(pos) <= it.value }
+            .count { pos -> sensors.none { it.isInRange(pos) } }
     }
 }
+
+private fun Pos.tuningFrequency() = (x * 40_000_00L) + y

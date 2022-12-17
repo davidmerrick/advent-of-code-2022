@@ -102,7 +102,7 @@ class SandGridPart2(
     companion object {
         fun of(lines: List<String>, floorModifier: Int? = null): SandGridPart2 {
             val rockPositions = lines.flatMap { parseRanges(it) }
-                .flatMap { it.positions() }
+                .flatMap { it.boxify() }
                 .toMutableList()
                 .apply { add(sandEntryPoint) }
 

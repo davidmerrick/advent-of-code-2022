@@ -3,7 +3,8 @@ package io.github.davidmerrick.aoc2022.day16
 data class Valve(
     val id: String,
     val flowRate: Int,
-    val tunnels: List<String>
+    val tunnels: List<String>,
+    var isOpen: Boolean = false
 ) {
     companion object {
         fun of(str: String): Valve {
@@ -11,7 +12,7 @@ data class Valve(
             return Valve(
                 split[1],
                 split[4].split("=")[1].replace(";", "").toInt(),
-                split.drop(8).map { it.replace(",", "") }
+                split.drop(9).map { it.replace(",", "") }
             )
         }
     }
