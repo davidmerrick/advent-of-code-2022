@@ -23,23 +23,23 @@ class SensorGrid(private val sensors: Set<Sensor>) {
             .let { Pos(it, row) }
     }
 
-    fun tuningFrequency(caveSize: Int): Long {
-        // Todo: Start with the sensors
-        // Use them plus distance, constrained by the cavesize, to generate a set of possible ranges
-
-        val cave = (0..caveSize)
-        return sensors().firstNotNullOf { sensor ->
-            val up = Pos(sensor.position.x, sensor.position.y - sensor - 1)
-            val down = Pos(sensor.position.x, sensor.position.y + sensor.distance + 1)
-            val left = Pos(sensor.position.x - sensor.distance - 1, sensor.position.y)
-            val right = Pos(sensor.position.x + sensor.distance + 1, sensor.position.y)
-
-            (up.lineTo(right) + right.lineTo(down) + down.lineTo(left) + left.lineTo(up))
-                .filter { it.x in cave && it.y in cave }
-                .firstOrNull { candidate -> sensors.none { sensor -> sensor.isInRange(candidate) } }
-        }.tuningFrequency()
-
-    }
+//    fun tuningFrequency(caveSize: Int): Long {
+//        // Todo: Start with the sensors
+//        // Use them plus distance, constrained by the cavesize, to generate a set of possible ranges
+//
+//        val cave = (0..caveSize)
+//        return sensors().firstNotNullOf { sensor ->
+//            val up = Pos(sensor.position.x, sensor.position.y - sensor - 1)
+//            val down = Pos(sensor.position.x, sensor.position.y + sensor.distance + 1)
+//            val left = Pos(sensor.position.x - sensor.distance - 1, sensor.position.y)
+//            val right = Pos(sensor.position.x + sensor.distance + 1, sensor.position.y)
+//
+//            (up.lineTo(right) + right.lineTo(down) + down.lineTo(left) + left.lineTo(up))
+//                .filter { it.x in cave && it.y in cave }
+//                .firstOrNull { candidate -> sensors.none { sensor -> sensor.isInRange(candidate) } }
+//        }.tuningFrequency()
+//
+//    }
 
     fun countNonBeaconPositions(row: Int): Int {
         return Range(computeMinRowPosition(row), computeMaxRowPosition(row))
