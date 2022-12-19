@@ -2,26 +2,17 @@ package io.github.davidmerrick.aoc2022.day18
 
 import io.github.davidmerrick.aoc.coordinates.Pos3d
 
-class CubeGrid(private val cubes: List<Pos3d>) {
-
-    private val intersections = cubes
-        .flatMap { it.flatten() }
-        .groupingBy { it }
-        .eachCount()
+class CubeGrid(private val cubes: Set<Pos3d>) {
 
     fun surfaceArea(): Int {
-        val intersectionCount = intersections.values.filter { it > 1 }.sumOf { it }
-        return (cubes.size * 6) - intersectionCount
+        return (cubes.size * 6) - cubes.sumOf { it.neighbors().count { neighbor -> neighbor in cubes } }
     }
-}
 
-/**
- * Returns all 2d coordinate pairs
- */
-fun Pos3d.flatten(): List<List<Int?>> {
-    return listOf(
-        listOf(x, null, z),
-        listOf(x, y, null),
-        listOf(null, y, z)
-    )
+    companion object {
+        fun of(lines: List<String>): CubeGrid {
+            return lines.map { Pos3d.of(it) }
+                .toSet()
+                .let { CubeGrid(it) }
+        }
+    }
 }
