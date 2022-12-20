@@ -24,18 +24,17 @@ class Day15Test {
 
     @Test
     fun `Part 2 example`() {
-//        readLines(this::class, "example.txt")
-//            .map { Sensor.of(it) }
-//            .let { SensorGrid(it.toSet()) }
-//            .tuningFrequency(0, 20) shouldBe 56_000_011L
+        readLines(this::class, "example.txt")
+            .map { Sensor.of(it) }
+            .let { SensorGrid(it.toSet()) }
+            .tuningFrequency(20) shouldBe 56_000_011L
     }
 
     @Test
     fun `Part 2`() {
-//        readLines(this::class, "day15.txt")
-//            .map { Sensor.of(it) }
-//            .let { SensorGrid(it.toSet()) }
-//            .tuningFrequency(0, 4_000_000)
-//            .let { println(it) }
+        readLines(this::class, "day15.txt")
+            .map { Sensor.of(it) }
+            .let { SensorGrid(it.toSet()) }
+            .tuningFrequency(4_000_000) shouldBe 11_796_491_041_245L
     }
 }
