@@ -23,4 +23,13 @@ internal class CubeGridTest {
             .let { CubeGrid.of(it) }
             .surfaceArea() shouldBe 64
     }
+
+    @Test
+    fun `Example part 2`() {
+        val grid = readLines(this::class, "example.txt")
+            .let { CubeGrid.of(it) }
+
+        grid.interiorCubes.size shouldBe 1
+        grid.externalSurfaceArea() shouldBe 58
+    }
 }
