@@ -15,13 +15,9 @@ class Day18Test {
 
     @Test
     fun `Part 2`() {
-        // Todo: 2013 is too low, 2222 is too high
-        // Need to take a different approach--can't assume this is a closed cube with a single air pocket
-        // Need to do a DFS or BFS to determine if if a position is reachable from the outside
-
         TestUtil.readLines(this::class, "day18.txt")
             .let { CubeGrid.of(it) }
-            .externalSurfaceArea()
+            .exteriorSurfaceArea()
             .let { println(it) }
     }
 }

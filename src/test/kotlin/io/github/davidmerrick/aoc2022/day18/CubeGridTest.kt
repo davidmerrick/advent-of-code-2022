@@ -29,7 +29,6 @@ internal class CubeGridTest {
         val grid = readLines(this::class, "example.txt")
             .let { CubeGrid.of(it) }
 
-        grid.interiorCubes.size shouldBe 1
-        grid.externalSurfaceArea() shouldBe 58
+        grid.exteriorSurfaceArea() shouldBe 58
     }
 }
