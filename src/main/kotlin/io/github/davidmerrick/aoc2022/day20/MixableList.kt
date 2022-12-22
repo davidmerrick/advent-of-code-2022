@@ -1,29 +1,20 @@
 package io.github.davidmerrick.aoc2022.day20
 
-class MixableList(input: List<Int>) {
-    private val values = input.mapIndexed { index, value -> MappedInt(index, value) }
+fun List<Int>.toMappedInts(): MutableList<IndexedNumber> {
+    return this.mapIndexed { index, value -> IndexedNumber(index, value.toLong()) }.toMutableList()
+}
 
-    fun mix(): List<Int> {
-        var newList = values.toMutableList()
-        for (item in values) {
-            newList = move(newList, newList.indexOfFirst { it.originalIndex == item.originalIndex })
-        }
-        return newList.map { it.value }
+fun MutableList<IndexedNumber>.mix() {
+    indices.forEach { originalIndex ->
+        val index = indexOfFirst { it.originalIndex == originalIndex }
+        val toMove = removeAt(index)
+        add((index + toMove.value).mod(size), toMove)
     }
+}
 
-    private fun boundIndex(index: Int): Int {
-        val bounded = index % values.size
-        return if (bounded < 0) values.size + bounded else bounded
-    }
-
-    private fun move(input: MutableList<MappedInt>, index: Int): MutableList<MappedInt> {
-        val value = input.removeAt(index)
-        val newIndex = computeNewIndex(index, input.size, value.value)
-        input.add(newIndex, value)
-        return input
-    }
-
-    private fun computeNewIndex(index: Int, listSize: Int, value: Int): Int {
-        return boundIndex((index + value) % listSize)
-    }
+fun MutableList<IndexedNumber>.groveCoordinates(): List<Long> {
+    val zeroIndex = this.indexOfFirst { it.value == 0L }
+    return listOf(1000, 2000, 3000)
+        .map { this[(zeroIndex + it).mod(size)] }
+        .map { it.value }
 }
