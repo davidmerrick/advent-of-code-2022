@@ -1,12 +1,14 @@
 package io.github.davidmerrick.aoc2022.day20
 
-class MixableList(private val values: List<Int>) {
+class MixableList(input: List<Int>) {
+    private val values = input.mapIndexed { index, value -> MappedInt(index, value) }
+
     fun mix(): List<Int> {
         var newList = values.toMutableList()
         for (item in values) {
-            newList = move(newList, newList.indexOf(item))
+            newList = move(newList, newList.indexOfFirst { it.originalIndex == item.originalIndex })
         }
-        return newList
+        return newList.map { it.value }
     }
 
     private fun boundIndex(index: Int): Int {
@@ -14,9 +16,9 @@ class MixableList(private val values: List<Int>) {
         return if (bounded < 0) values.size + bounded else bounded
     }
 
-    private fun move(input: MutableList<Int>, index: Int): MutableList<Int> {
+    private fun move(input: MutableList<MappedInt>, index: Int): MutableList<MappedInt> {
         val value = input.removeAt(index)
-        val newIndex = computeNewIndex(index, input.size, value)
+        val newIndex = computeNewIndex(index, input.size, value.value)
         input.add(newIndex, value)
         return input
     }
