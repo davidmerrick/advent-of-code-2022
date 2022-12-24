@@ -1,13 +1,16 @@
 package io.github.davidmerrick.aoc2022.day21
 
-class MonkeyGame(private val monkeys: List<Monkey>) {
+class MonkeyGame(monkeys: List<Monkey>) {
 
-    fun play() = monkeys.getRoot().yell()
+    private val root = monkeys.first { it.id == ROOT_ID }
+
+    fun play() = root.yell()
+    fun humanValue() = root.humanValue()
 
     companion object {
         fun of(input: List<String>): MonkeyGame {
             val monkeys = input.map { Monkey(it) }
-            monkeys.filterIsInstance<FormulaMonkey>().forEach { monkey ->
+            monkeys.filterIsInstance<OpMonkey>().forEach { monkey ->
                 monkey.left = monkeys.first { it.id == monkey.leftId }
                 monkey.right = monkeys.first { it.id == monkey.rightId }
             }
@@ -15,5 +18,3 @@ class MonkeyGame(private val monkeys: List<Monkey>) {
         }
     }
 }
-
-fun List<Monkey>.getRoot() = this.first { it.id == "root" }
