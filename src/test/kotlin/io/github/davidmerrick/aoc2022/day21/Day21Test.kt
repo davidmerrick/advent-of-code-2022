@@ -9,17 +9,7 @@ class Day21Test {
     @Test
     fun `Part 1`() {
         TestUtil.readLines(this::class, "day21.txt")
-            .map { Day21Monkey.of(it) }
-            .let { Day21MonkeyGame(it) }
+            .let { MonkeyGame.of(it) }
             .play() shouldBe 158_731_561_459_602L
-    }
-
-    @Test
-    fun `Part 2`(){
-        val game = TestUtil.readLines(this::class, "day21.txt")
-            .map { Day21Monkey.of(it) }
-            .let { Day21Part2MonkeyGame(it) }
-
-        println(game.findInput())
     }
 }

@@ -4,13 +4,12 @@ import io.github.davidmerrick.aoc.util.TestUtil.readLines
 import io.kotlintest.shouldBe
 import org.junit.jupiter.api.Test
 
-internal class Day21MonkeyGameTest {
+internal class MonkeyGameTest {
 
     @Test
-    fun `Play rounds`() {
+    fun `Part 1 example`() {
         val game = readLines(this::class, "example.txt")
-            .map { Day21Monkey.of(it) }
-            .let { Day21MonkeyGame(it) }
+            .let { MonkeyGame.of(it) }
 
         game.play() shouldBe 152
     }
