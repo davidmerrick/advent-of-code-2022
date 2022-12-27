@@ -52,18 +52,27 @@ tasks {
 
     register("newDay") {
         group = "advent"
-        description = "Creates folders and boilerplate for new AOC day"
+        description = """
+            Creates folders and boilerplate for new AOC day.
+            Pass in param "day" to initialize day by number (i.e. "-Pday=5") or else defaults to the day after the highest
+            one in the source directory.
+        """.trimIndent()
 
         doLast {
             val groupDirectory = project.group.toString().replace(".", "/")
 
+            val dayKey = "day"
             // Compute the integer value for the next day
-            val dayValue = File("${rootDir.path}/src/test/kotlin/$groupDirectory")
-                .list()
-                .filter { it.startsWith("day") }
-                .map { it.replace("day", "") }
-                .maxOf { it.toInt() }
-                .let { it + 1 }
+            val dayValue = if (project.properties.containsKey(dayKey)) {
+                project.properties[dayKey]
+            } else {
+                File("${rootDir.path}/src/test/kotlin/$groupDirectory")
+                    .list()
+                    .filter { it.startsWith("day") }
+                    .map { it.replace("day", "") }
+                    .maxOf { it.toInt() }
+                    .let { it + 1 }
+            }
 
             println("Preparing day $dayValue \uD83C\uDF1E")
 
