@@ -11,6 +11,17 @@ class Day25Test {
         val snafuNumbers = readLines(this::class, "example.txt")
             .map { SnafuNumber(it) }
 
-        snafuNumbers.sumOf { it.toInt() } shouldBe 4890
+        val sum = snafuNumbers.sumOf { it.toInt() }
+        sum shouldBe 4890
+        sum.toSnafu() shouldBe "2=-1=0"
+    }
+
+    @Test
+    fun `Part 1 full`() {
+        val snafuNumbers = readLines(this::class, "day25.txt")
+            .map { SnafuNumber(it) }
+
+        val sum = snafuNumbers.sumOf { it.toInt() }
+        println(sum.toSnafu())
     }
 }
