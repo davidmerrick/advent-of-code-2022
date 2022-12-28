@@ -13,7 +13,7 @@ class Day25Test {
 
         val sum = snafuNumbers.sumOf { it.toInt() }
         sum shouldBe 4890
-        sum.toSnafu() shouldBe "2=-1=0"
+        SnafuNumber.of(sum).value shouldBe "2=-1=0"
     }
 
     @Test
@@ -22,6 +22,6 @@ class Day25Test {
             .map { SnafuNumber(it) }
 
         val sum = snafuNumbers.sumOf { it.toInt() }
-        println(sum.toSnafu())
+        println(SnafuNumber.of(sum).value)
     }
 }

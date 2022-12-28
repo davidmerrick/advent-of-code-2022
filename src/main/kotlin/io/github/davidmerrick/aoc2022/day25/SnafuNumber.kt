@@ -7,33 +7,29 @@ import kotlin.math.pow
  */
 class SnafuNumber(val value: String) {
 
-    fun toInt(): Long {
+    fun toDecimal(): Long {
         return value.reversed()
             .mapIndexed { index, c ->
-                (5.toDouble().pow(index.toDouble()) * c.fromSnafu()).toLong()
-            }.sum()
+                5.toDouble().pow(index.toDouble()) * charToSnafu(c)
+            }.sumOf { it.toLong() }
     }
-}
 
-fun Char.fromSnafu() = when (this) {
-    '-' -> -1
-    '=' -> -2
-    else -> this.digitToInt()
-}
+    private fun charToSnafu(input: Char) = when (input) {
+        '-' -> -1
+        '=' -> -2
+        else -> input.digitToInt().toLong()
+    }
 
-fun Long.toSnafu(): String {
-    return generateSequence(this) { (it + 2) / 5 }
-        .takeWhile { it > 0L }
-        .map {
-            val remainder = (it % 5).toInt()
-            when (remainder) {
-                0 -> "0"
-                1 -> "1"
-                2 -> "2"
-                3 -> "="
-                4 -> "-"
-                else -> error(remainder)
-            }
-        }.toList()
-        .reversed().joinToString("")
+    companion object {
+        // This is essentially just a base-5 number shifted up by 2
+        fun of(value: Long): SnafuNumber = generateSequence(value) { (it + 2) / 5 }
+            .takeWhile { it > 0L }
+            .map {
+                val remainder = (it % 5).toInt()
+                "012=-"[remainder]
+            }.toList()
+            .reversed()
+            .joinToString("")
+            .let { SnafuNumber(it) }
+    }
 }

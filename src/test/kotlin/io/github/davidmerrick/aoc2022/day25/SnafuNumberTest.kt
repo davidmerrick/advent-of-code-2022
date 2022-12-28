@@ -15,23 +15,22 @@ internal class SnafuNumberTest {
         "1121-1110-1=0" to 314_159_265,
     ).map { (input, expected) ->
         DynamicTest.dynamicTest("Convert Snafu to decimal") {
-            SnafuNumber(input).toInt() shouldBe expected
+            SnafuNumber(input).toDecimal() shouldBe expected
         }
     }
 
     @TestFactory
     fun `Long to snafu`() = listOf(
-//        1 to "1",
-//        3 to "1=",
-        8L to "2=",
-//        20 to "1-0",
-//        2022 to "1=11-2",
-//        12345 to "1-0---0",
-//        314_159_265 to "1121-1110-1=0",
+        1 to "1",
+        3 to "1=",
+        8 to "2=",
+        20 to "1-0",
+        2022 to "1=11-2",
+        12345 to "1-0---0",
+        314_159_265 to "1121-1110-1=0",
     ).map { (input, expected) ->
-        DynamicTest.dynamicTest("Convert Snafu to decimal") {
-//            input.toSnafu2() shouldBe expected
-            input.toSnafu() shouldBe expected
+        DynamicTest.dynamicTest("Convert decimal to snafu") {
+            SnafuNumber.of(input.toLong()).value shouldBe expected
         }
     }
 }
