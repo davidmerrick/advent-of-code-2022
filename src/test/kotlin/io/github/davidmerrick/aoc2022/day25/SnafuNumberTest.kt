@@ -7,7 +7,7 @@ import org.junit.jupiter.api.TestFactory
 internal class SnafuNumberTest {
 
     @TestFactory
-    fun `Part 1 examples`() = listOf(
+    fun `Snafu to int`() = listOf(
         "1" to 1,
         "1=" to 3,
         "1=11-2" to 2022,
@@ -19,5 +19,17 @@ internal class SnafuNumberTest {
         }
     }
 
-
+    @TestFactory
+    fun `Int to snafu`() = listOf(
+        1 to "1",
+        3 to "1=",
+        20 to "1-0",
+        2022 to "1=11-2",
+        12345 to "1-0---0",
+        314_159_265 to "1121-1110-1=0",
+    ).map { (input, expected) ->
+        DynamicTest.dynamicTest("Convert Snafu to decimal") {
+            SnafuNumber.of(input).value shouldBe expected
+        }
+    }
 }
