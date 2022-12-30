@@ -1,6 +1,7 @@
 package io.github.davidmerrick.aoc2022.day16
 
 import io.github.davidmerrick.aoc.util.TestUtil.readLines
+import io.kotlintest.shouldBe
 import org.junit.jupiter.api.Test
 
 internal class ValveMazeTest {
@@ -11,7 +12,7 @@ internal class ValveMazeTest {
         val maze = readLines(this::class, "example.txt")
             .let { ValveMaze.of(it) }
 
-        maze.shortestPaths()
-        println("foo")
+        val paths = maze.shortestPaths()
+        paths.size shouldBe 6
     }
 }
