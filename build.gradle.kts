@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "io.github.davidmerrick.aoc2022"
 
 repositories {
@@ -13,7 +15,7 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.7.21"
 }
 
 dependencies {
@@ -34,15 +36,9 @@ dependencies {
 }
 
 tasks {
-    compileKotlin {
+    withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-
-    compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "17"
         }
     }
 
