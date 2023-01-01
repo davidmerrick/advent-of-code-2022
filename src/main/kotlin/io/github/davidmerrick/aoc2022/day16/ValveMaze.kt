@@ -1,39 +1,62 @@
 package io.github.davidmerrick.aoc2022.day16
 
-import com.github.shiguruikai.combinatoricskt.combinations
 import com.github.shiguruikai.combinatoricskt.permutations
-import io.github.davidmerrick.aoc.search.Bfs
+import io.github.davidmerrick.aoc.collections.set
 
-class ValveMaze(private val valves: List<Valve>) : Bfs<String>() {
+class ValveMaze(private val valves: Map<String, Valve>) {
+
+    val shortestPaths by lazy { shortestPaths() }
+
+    fun searchPaths(
+        location: String,
+        timeAllowed: Int,
+        seen: Set<String> = emptySet(),
+        timeTaken: Int = 0,
+        totalFlow: Int = 0
+    ): Int = shortestPaths
+        .getValue(location)
+        .asSequence()
+        .filterNot { (nextRoom, _) -> nextRoom in seen }
+        .filter { (_, traversalCost) -> timeTaken + traversalCost + 1 < timeAllowed }
+        .maxOfOrNull { (nextRoom, traversalCost) ->
+            searchPaths(
+                nextRoom,
+                timeAllowed,
+                seen + nextRoom,
+                timeTaken + traversalCost + 1,
+                totalFlow + ((timeAllowed - timeTaken - traversalCost - 1) * valves.getValue(nextRoom).flowRate)
+            )
+        } ?: totalFlow
 
     /**
-     * Use BFS to compute shortest path from a room to every other
-     * Chose BFS because the path cost is 1 between all these
+     * Compute shortest path from a room to every other
      */
-    fun shortestPaths(): Map<String, Map<String, Int>> {
-        return valves.map { it.id }
-            .combinations(2)
-            .map { it.first() to mapOf(it.last() to shortestPath(it.first(), it.last())) }
-            .groupBy({ it.first }, { it.second })
-            .map { entry ->
-                entry.key to entry.value.flatMap { it.entries }.associate { it.key to it.value }
-            }
-            // Filter out zero flow-rate spots
-            .filterNot { path ->
-                val valve = valves.first { it.id == path.first }
-                valve.flowRate == 0 && valve.id != "AA"
-            }
-            // Filter only places accessible from AA
-            .filterNot { shortestPath("AA", it.first) == Int.MAX_VALUE }
-            .toMap()
+    private fun shortestPaths(): Map<String, Map<String, Int>> {
+        val shortestPaths = valves.values.associate {
+            it.id to it.tunnels.associateWith { 1 }.toMutableMap()
+        }.toMutableMap()
+
+        shortestPaths.keys.permutations(3).forEach { (waypoint, from, to) ->
+            shortestPaths[from, to] = minOf(
+                shortestPaths[from, to], // Existing Path
+                shortestPaths[from, waypoint] + shortestPaths[waypoint, to] // New Path
+            )
+        }
+        val zeroFlowRooms = valves.values.filter { it.flowRate == 0 || it.id == "AA" }
+            .map { it.id }
+            .toSet()
+        shortestPaths.values.forEach { it.keys.removeAll(zeroFlowRooms) }
+        val canGetToFromAA: Set<String> = shortestPaths.getValue("AA").keys
+        return shortestPaths.filter { it.key in canGetToFromAA || it.key == "AA" }
     }
 
 
     companion object {
-        fun of(lines: List<String>): ValveMaze {
-            return ValveMaze(lines.map { Valve.of(it) })
-        }
+        fun of(lines: List<String>) = lines.map { Valve.of(it) }
+            .associateBy { it.id }
+            .let { ValveMaze(it) }
     }
-
-    override fun getAdjacent(input: String) = valves.first { it.id == input }.tunnels
 }
+
+private operator fun Map<String, Map<String, Int>>.get(key1: String, key2: String, defaultValue: Int = 31000): Int =
+    get(key1)?.get(key2) ?: defaultValue

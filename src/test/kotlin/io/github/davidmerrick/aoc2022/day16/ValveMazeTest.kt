@@ -8,11 +8,20 @@ internal class ValveMazeTest {
 
 
     @Test
-    fun `Compute shortest paths`(){
+    fun `Compute shortest paths`() {
+        val paths = readLines(this::class, "example.txt")
+            .let { ValveMaze.of(it) }
+            .shortestPaths
+
+        paths.size shouldBe 6
+    }
+
+    @Test
+    fun `Part 1 example`() {
         val maze = readLines(this::class, "example.txt")
             .let { ValveMaze.of(it) }
 
-        val paths = maze.shortestPaths()
-        paths.size shouldBe 6
+        val result = maze.searchPaths("AA", 30)
+        result shouldBe 1651
     }
 }
