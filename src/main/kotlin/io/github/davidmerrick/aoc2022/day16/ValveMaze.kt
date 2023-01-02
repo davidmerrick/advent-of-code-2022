@@ -1,7 +1,9 @@
 package io.github.davidmerrick.aoc2022.day16
 
 import com.github.shiguruikai.combinatoricskt.permutations
-import io.github.davidmerrick.aoc.collections.set
+import com.google.common.collect.HashBasedTable
+import io.github.davidmerrick.aoc.guava.asSequence
+import io.github.davidmerrick.aoc.guava.toTable
 
 class ValveMaze(private val valves: Map<String, Valve>) {
 
@@ -31,23 +33,29 @@ class ValveMaze(private val valves: Map<String, Valve>) {
     /**
      * Compute shortest path from a room to every other
      */
-    private fun shortestPaths(): Map<String, Map<String, Int>> {
-        val shortestPaths = valves.values.associate {
-            it.id to it.tunnels.associateWith { 1 }.toMutableMap()
-        }.toMutableMap()
+    private fun shortestPaths(): HashBasedTable<String, String, Int> {
+        val shortestPaths = HashBasedTable.create<String, String, Int>()
+        valves.values.forEach {
+            shortestPaths.put(it.id, it.id, 1)
+        }
 
-        shortestPaths.keys.permutations(3).forEach { (waypoint, from, to) ->
-            shortestPaths[from, to] = minOf(
-                shortestPaths[from, to], // Existing Path
-                shortestPaths[from, waypoint] + shortestPaths[waypoint, to] // New Path
+        shortestPaths.rows.permutations(3).forEach { (waypoint, from, to) ->
+            shortestPaths.put(
+                from, to, minOf(
+                    shortestPaths.get(from, to) ?: 31_000, // Existing Path
+                    shortestPaths.get(from, waypoint) + shortestPaths.get(waypoint, to) // New Path
+                )
             )
         }
         val zeroFlowRooms = valves.values.filter { it.flowRate == 0 || it.id == "AA" }
             .map { it.id }
             .toSet()
-        shortestPaths.values.forEach { it.keys.removeAll(zeroFlowRooms) }
+        shortestPaths.rowKeySet().forEach { it.keys.removeAll(zeroFlowRooms) }
         val canGetToFromAA: Set<String> = shortestPaths.getValue("AA").keys
-        return shortestPaths.filter { it.key in canGetToFromAA || it.key == "AA" }
+        return shortestPaths
+            .asSequence()
+            .filter { it.row in canGetToFromAA || it.row == "AA" }
+            .toTable()
     }
 
 
@@ -57,6 +65,3 @@ class ValveMaze(private val valves: Map<String, Valve>) {
             .let { ValveMaze(it) }
     }
 }
-
-private operator fun Map<String, Map<String, Int>>.get(key1: String, key2: String, defaultValue: Int = 31000): Int =
-    get(key1)?.get(key2) ?: defaultValue
