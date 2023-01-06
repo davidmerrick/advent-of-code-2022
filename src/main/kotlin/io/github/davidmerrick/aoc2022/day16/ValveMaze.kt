@@ -42,12 +42,14 @@ class ValveMaze(private val valves: Map<String, Valve>) {
 
         // Shortest path to its neighbors is 1
         valves.values.forEach {
-            it.neighbors.forEach { tunnel ->
-                shortestPaths.put(it.id, tunnel, 1)
+            it.neighbors.forEach { neighbor ->
+                shortestPaths.put(it.id, neighbor, 1)
             }
         }
 
-        shortestPaths.columnKeySet()
+        shortestPaths.asSequence()
+            .map { it.row }
+            .toList()
             .permutations(3)
             .forEach { (waypoint, from, to) ->
                 shortestPaths.put(
