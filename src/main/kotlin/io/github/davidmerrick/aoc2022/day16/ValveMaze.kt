@@ -4,6 +4,9 @@ import com.github.shiguruikai.combinatoricskt.permutations
 import com.google.common.collect.HashBasedTable
 import io.github.davidmerrick.aoc.guava.asSequence
 import io.github.davidmerrick.aoc.guava.toTable
+import io.github.davidmerrick.aoc.guava.get
+
+private const val DEFAULT_PATH_LENGTH = 31_000
 
 class ValveMaze(private val valves: Map<String, Valve>) {
 
@@ -16,7 +19,7 @@ class ValveMaze(private val valves: Map<String, Valve>) {
         timeTaken: Int = 0,
         totalFlow: Int = 0
     ): Int = shortestPaths
-        .getValue(location)
+        .row(location)
         .asSequence()
         .filterNot { (nextRoom, _) -> nextRoom in seen }
         .filter { (_, traversalCost) -> timeTaken + traversalCost + 1 < timeAllowed }
@@ -32,26 +35,47 @@ class ValveMaze(private val valves: Map<String, Valve>) {
 
     /**
      * Compute shortest path from a room to every other
+     * Result is a table containing rows of start, end, and distance
      */
     private fun shortestPaths(): HashBasedTable<String, String, Int> {
         val shortestPaths = HashBasedTable.create<String, String, Int>()
+
+        // Shortest path to its neighbors is 1
         valves.values.forEach {
-            shortestPaths.put(it.id, it.id, 1)
+            it.neighbors.forEach { tunnel ->
+                shortestPaths.put(it.id, tunnel, 1)
+            }
         }
 
-        shortestPaths.rows.permutations(3).forEach { (waypoint, from, to) ->
-            shortestPaths.put(
-                from, to, minOf(
-                    shortestPaths.get(from, to) ?: 31_000, // Existing Path
-                    shortestPaths.get(from, waypoint) + shortestPaths.get(waypoint, to) // New Path
+        shortestPaths.columnKeySet()
+            .permutations(3)
+            .forEach { (waypoint, from, to) ->
+                shortestPaths.put(
+                    from, to, minOf(
+                        shortestPaths.get(from, to, DEFAULT_PATH_LENGTH)!!, // Existing path
+                        shortestPaths.get(from, waypoint, DEFAULT_PATH_LENGTH)!! + shortestPaths.get(
+                            waypoint,
+                            to,
+                            DEFAULT_PATH_LENGTH
+                        )!! // New Path
+                    )
                 )
-            )
-        }
-        val zeroFlowRooms = valves.values.filter { it.flowRate == 0 || it.id == "AA" }
+            }
+
+        // Filter out rooms with a flow rate of 0 that are not AA
+        valves.values.filter { it.flowRate == 0 || it.id == "AA" }
             .map { it.id }
             .toSet()
-        shortestPaths.rowKeySet().forEach { it.keys.removeAll(zeroFlowRooms) }
-        val canGetToFromAA: Set<String> = shortestPaths.getValue("AA").keys
+            .forEach {
+                shortestPaths.remove(it, null)
+            }
+
+        // Filter only rooms accessible from "AA"
+        val canGetToFromAA: Set<String> = shortestPaths.asSequence()
+            .filter { it.column == "AA" }
+            .map { it.row }
+            .toSet()
+
         return shortestPaths
             .asSequence()
             .filter { it.row in canGetToFromAA || it.row == "AA" }

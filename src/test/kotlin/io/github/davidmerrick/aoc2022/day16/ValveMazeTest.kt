@@ -13,7 +13,7 @@ internal class ValveMazeTest {
             .let { ValveMaze.of(it) }
             .shortestPaths
 
-        paths.size shouldBe 6
+        paths.rowKeySet().size shouldBe 6
     }
 
     @Test
