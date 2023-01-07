@@ -21,7 +21,7 @@ plugins {
 dependencies {
 
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("io.github.davidmerrick.aoc:advent-of-code-utils:2.0.5")
+    implementation("io.github.davidmerrick.aoc:advent-of-code-utils:2.0.8")
     implementation("com.ginsberg:cirkle:1.0.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.14.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
