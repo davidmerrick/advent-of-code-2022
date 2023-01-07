@@ -8,7 +8,7 @@ object TetrisPieces {
         ".#.\n###\n.#.",
         "..#\n..#\n###",
         "#\n#\n#\n#",
-        "##\n##\n"
+        "##\n##"
     ).map { TetrisPiece(it) }
         .circular()
 }
