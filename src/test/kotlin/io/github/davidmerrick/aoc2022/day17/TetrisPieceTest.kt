@@ -1,5 +1,6 @@
 package io.github.davidmerrick.aoc2022.day17
 
+import io.github.davidmerrick.aoc.coordinates.LongPos
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.kotlintest.matchers.collections.shouldContainAll
 import io.kotlintest.shouldBe
@@ -10,7 +11,7 @@ internal class TetrisPieceTest {
 
     @Test
     fun `Compute positions of flat piece`() {
-        val positions = TetrisPiece("####").computePositions(Pos(0, 0))
+        val positions = TetrisPiece("####").computePositions(LongPos(0, 0))
         positions.size shouldBe 4
         val xList = positions.map { it.x }
         xList.max() shouldBe 3
@@ -21,7 +22,7 @@ internal class TetrisPieceTest {
 
     @Test
     fun `Compute positions of square piece`() {
-        val positions = TetrisPiece("##\n##").computePositions(Pos(0, 0))
+        val positions = TetrisPiece("##\n##").computePositions(LongPos(0, 0))
         positions.size shouldBe 4
         val xList = positions.map { it.x }
         xList shouldContainAll listOf(0, 1)
@@ -31,7 +32,7 @@ internal class TetrisPieceTest {
 
     @Test
     fun `Compute positions of vertical piece`() {
-        val positions = TetrisPiece("#\n#\n#\n#").computePositions(Pos(0, 0))
+        val positions = TetrisPiece("#\n#\n#\n#").computePositions(LongPos(0, 0))
         positions.size shouldBe 4
         val xList = positions.map { it.x }
         xList shouldContainAll listOf(0)
@@ -41,7 +42,7 @@ internal class TetrisPieceTest {
 
     @Test
     fun `Compute positions of plus piece`() {
-        val positions = TetrisPiece(".#.\n###\n.#.").computePositions(Pos(0, 0))
+        val positions = TetrisPiece(".#.\n###\n.#.").computePositions(LongPos(0, 0))
         positions.size shouldBe 5
         positions.shouldContainAll(
             Pos(1, 0),

@@ -10,7 +10,7 @@ internal class TetrisGameTest {
     fun `Example part 1`() {
         val game = TetrisGame.of(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")
         game.dropPieces(2022)
-        game.totalHeight - 1 shouldBe 3068
+        game.piecesHeight - 1 shouldBe 3068
     }
 
     @Test
@@ -19,13 +19,22 @@ internal class TetrisGameTest {
             .let { TetrisGame.of(it) }
 
         game.dropPieces(2022)
-        game.totalHeight - 1 shouldBe 3227
+        game.piecesHeight - 1 shouldBe 3227
     }
 
     @Test
     fun `Example part 2`() {
         val game = TetrisGame.of(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")
         game.dropPieces(1_000_000_000_000)
-        game.totalHeight - 1 shouldBe 1_514_285_714_288
+        game.piecesHeight - 1 shouldBe 1_514_285_714_288
+    }
+
+    @Test
+    fun `Part 2 full`() {
+        val game = readText(this::class, "day17.txt")
+            .let { TetrisGame.of(it) }
+
+        game.dropPieces(1_000_000_000_000)
+        println(game.piecesHeight - 1)
     }
 }

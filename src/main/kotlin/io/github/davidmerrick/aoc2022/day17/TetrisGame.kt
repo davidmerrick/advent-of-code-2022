@@ -3,72 +3,67 @@ package io.github.davidmerrick.aoc2022.day17
 import com.ginsberg.cirkle.CircularList
 import com.ginsberg.cirkle.circular
 import com.google.common.collect.HashBasedTable
-import io.github.davidmerrick.aoc.coordinates.Pos
+import io.github.davidmerrick.aoc.coordinates.LongPos
 import io.github.davidmerrick.aoc.guava.asSequence
 import io.github.davidmerrick.aoc.guava.containsAny
-import io.github.davidmerrick.aoc.guava.fillEmpty
-import io.github.davidmerrick.aoc.guava.print
 import io.github.davidmerrick.aoc.guava.putAll
+import io.github.davidmerrick.aoc.guava.rowList
 
 /**
  * Each rock appears so that its left edge is two units away from the left wall
  * and its bottom edge is three units above the highest rock in the room
  * (or the floor, if there isn't one).
- *
- * Todo: I bet what we could do is rebalance the table, similar to how real tetris does
- * If there's a complete row high up in the table, remove all elements below and add the row count to
- * the height
  */
 
 class TetrisGame(private val jet: CircularList<Char>) {
     private val width = 7
-    private val table = HashBasedTable.create<Int, Int, Boolean>()
+    private var table = HashBasedTable.create<Long, Long, Boolean>()
 
-    private var truncatedRows = 0
-    val totalHeight: Int
-        get() = truncatedRows + viewHeight
+    private var floor = 0L
 
-    private val viewHeight: Int
-        get() = ((table.asSequence().filter { it.value }.maxOfOrNull { it.row } ?: 0) + 1) - truncatedRows
+    val piecesHeight: Long
+        get() = ((table.asSequence().filter { it.value }.maxOfOrNull { it.row } ?: floor) + 1)
 
     fun dropPieces(n: Long) {
         var jetIndex = 0
-        (0 until n).map { TetrisPieces.pieces[it.toInt()] }
-            .forEach { piece ->
-                // Drop piece
-                val height = viewHeight + 3
-                var curPos = Pos(2, height)
-                while (true) {
-                    val direction = jet[jetIndex]
-                    curPos = move(piece, curPos, direction)
-                    jetIndex++
-                    if (isAtRest(piece, curPos)) break
-                    curPos = curPos.copy(y = curPos.y - 1)
-                }
-                table.putAll(piece.computePositions(curPos), true)
-                rebalanceTable()
+        (0 until n).forEach { index ->
+            // Drop piece
+            val piece = TetrisPieces.pieces[(index % TetrisPieces.pieces.size).toInt()]
+            val height = piecesHeight + 3
+            var curPos = LongPos(2, height)
+            while (true) {
+                val direction = jet[jetIndex]
+                curPos = move(piece, curPos, direction)
+                jetIndex = (jetIndex + 1) % jet.size
+                if (isAtRest(piece, curPos)) break
+                curPos = curPos.copy(y = curPos.y - 1)
             }
-    }
+            val positions = piece.computePositions(curPos)
+            table.putAll(positions, true)
 
-    private fun rebalanceTable() {
-        highestCompleteRow()?.let {
-            truncatedRows += it
-            (0..it).forEach { row -> table.remove(row, null) }
+            // If there's a complete row, raise the floor
+            positions.map { it.y }
+                .toSet()
+                .sortedDescending()
+                .firstOrNull { isRowComplete(it) }?.let {
+                    raiseFloor(it)
+                }
         }
     }
 
-    /**
-     * Returns the row where all of the values are set
-     * null otherwise
-     */
-    private fun highestCompleteRow(): Int? {
-        return table.asSequence()
-            .groupBy { it.row }
-            .filter { row -> row.value.map { it.value }.count { it } == width }
-            .maxOfOrNull { it.key }
+    private fun isRowComplete(row: Long): Boolean {
+        return table.rowList(row).count { it } == width
     }
 
-    private fun move(piece: TetrisPiece, curPos: Pos, direction: Char): Pos {
+    /**
+     * Raises floor and removes rows below from the table
+     */
+    private fun raiseFloor(row: Long) {
+        (floor..row).forEach { table.row(it).clear() }
+        floor = row
+    }
+
+    private fun move(piece: TetrisPiece, curPos: LongPos, direction: Char): LongPos {
         when (direction) {
             '>' -> if (canMoveRight(piece, curPos)) {
                 return curPos.copy(x = curPos.x + 1)
@@ -80,13 +75,13 @@ class TetrisGame(private val jet: CircularList<Char>) {
         return curPos
     }
 
-    private fun canMoveRight(piece: TetrisPiece, curPos: Pos): Boolean {
+    private fun canMoveRight(piece: TetrisPiece, curPos: LongPos): Boolean {
         val positionsToCheck = piece.computePositions(curPos.copy(x = curPos.x + 1))
         return (curPos.x + piece.width) < width &&
             !table.containsAny(positionsToCheck, true)
     }
 
-    private fun canMoveLeft(piece: TetrisPiece, curPos: Pos): Boolean {
+    private fun canMoveLeft(piece: TetrisPiece, curPos: LongPos): Boolean {
         val positionsToCheck = piece.computePositions(curPos.copy(x = curPos.x - 1))
         return curPos.x > 0 &&
             !table.containsAny(positionsToCheck, true)
@@ -97,19 +92,9 @@ class TetrisGame(private val jet: CircularList<Char>) {
      * checks if board contains pieces that are 1 below
      * or if floor was hit
      */
-    private fun isAtRest(piece: TetrisPiece, pos: Pos): Boolean {
+    private fun isAtRest(piece: TetrisPiece, pos: LongPos): Boolean {
         val belowPos = pos.copy(y = pos.y - 1)
-        return belowPos.y == 0 || table.containsAny(piece.computePositions(belowPos), true)
-    }
-
-    fun print(): String {
-        table.fillEmpty(Pos(0, 0), Pos(width - 1, totalHeight), false)
-        return table.print(
-            { if (it) "#" else "." },
-            { it.toSortedMap() }
-        ).split("\n")
-            .reversed()
-            .joinToString("\n")
+        return belowPos.y == floor || table.containsAny(piece.computePositions(belowPos), true)
     }
 
     companion object {
