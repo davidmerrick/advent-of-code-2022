@@ -20,6 +20,7 @@ private const val LOG_INTERVAL = 5000L
 class TetrisGame(private val jet: CircularList<Char>) {
     private val width = 7
     private var table = HashBasedTable.create<Long, Long, Boolean>()
+    private val gameStates: MutableList<GameState> = mutableListOf()
 
     private var floor = 0L
 
@@ -28,9 +29,15 @@ class TetrisGame(private val jet: CircularList<Char>) {
 
     fun dropPieces(n: Long) {
         var jetIndex = 0
-        (0 until n).forEach { index ->
+        for (i in 0 until n) {
             // Drop piece
-            val piece = TetrisPieces.pieces[(index % TetrisPieces.pieces.size).toInt()]
+            val piece = TetrisPieces.pieces[(i % TetrisPieces.pieces.size).toInt()]
+            val gameState = GameState(jetIndex, piece, getNormalizedBoard())
+            if (gameState in gameStates) {
+                println("Detected a loop!")
+                break
+            }
+            gameStates.add(gameState)
             val height = piecesHeight + 3
             var curPos = LongPos(2, height)
             while (true) {
@@ -43,19 +50,43 @@ class TetrisGame(private val jet: CircularList<Char>) {
             val positions = piece.computePositions(curPos)
             table.putAll(positions, true)
 
-            // If there's a complete row, raise the floor
-            positions.map { it.y }
-                .toSet()
-                .sortedDescending()
-                .firstOrNull { isRowComplete(it) }?.let {
-                    println("Raising floor")
-                    raiseFloor(it)
-                }
+            raiseFloor(getNewFloor(piece, curPos))
 
-            if(index % LOG_INTERVAL == 0L){
-                println("Index: $index. Pieces height: $piecesHeight. Table size: ${table.size()}")
+            if (i % LOG_INTERVAL == 0L) {
+                println("Index: $i. Pieces height: $piecesHeight. Table size: ${table.size()}")
             }
         }
+
+        (n / gameStates.size) * piecesHeight
+    }
+
+    /**
+     * Computes new floor value, if floor can be raised
+     * Returns current value otherwise
+     */
+    private fun getNewFloor(piece: TetrisPiece, curPos: LongPos): Long {
+        val positions = piece.computePositions(curPos)
+
+        // Check if any complete a row
+        positions.map { it.y }
+            .toSet()
+            .sortedDescending()
+            .firstOrNull { isRowComplete(it) }?.let {
+                return it
+            }
+
+        // Check if any rows are blocked off one below
+        // i.e.:
+        // ..###..
+        // ##...##
+        positions.map { it.y }.forEach { row ->
+            val blocksBelow = table.row(row).map { it.key }.toSet()
+                .union(table.row(row - 1).map { it.key }.toSet())
+                .size == width
+            if (blocksBelow) return row - 1
+        }
+
+        return floor
     }
 
     private fun isRowComplete(row: Long): Boolean {
@@ -66,8 +97,16 @@ class TetrisGame(private val jet: CircularList<Char>) {
      * Raises floor and removes rows below from the table
      */
     private fun raiseFloor(row: Long) {
+        if (floor == row) return
+        println("Raising floor to $row")
         (floor..row).forEach { table.row(it).clear() }
         floor = row
+    }
+
+    private fun getNormalizedBoard(): Set<LongPos> {
+        return table.asSequence()
+            .map { LongPos(it.column, it.row - floor) }
+            .toSet()
     }
 
     private fun move(piece: TetrisPiece, curPos: LongPos, direction: Char): LongPos {
