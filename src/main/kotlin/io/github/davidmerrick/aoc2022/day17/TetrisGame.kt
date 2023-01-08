@@ -15,7 +15,7 @@ import io.github.davidmerrick.aoc.guava.rowList
  * (or the floor, if there isn't one).
  */
 
-private const val LOG_INTERVAL = 10_000L
+private const val LOG_INTERVAL = 5000L
 
 class TetrisGame(private val jet: CircularList<Char>) {
     private val width = 7
@@ -48,11 +48,12 @@ class TetrisGame(private val jet: CircularList<Char>) {
                 .toSet()
                 .sortedDescending()
                 .firstOrNull { isRowComplete(it) }?.let {
+                    println("Raising floor")
                     raiseFloor(it)
                 }
 
             if(index % LOG_INTERVAL == 0L){
-                println("Index: $index. Pieces height: $piecesHeight")
+                println("Index: $index. Pieces height: $piecesHeight. Table size: ${table.size()}")
             }
         }
     }

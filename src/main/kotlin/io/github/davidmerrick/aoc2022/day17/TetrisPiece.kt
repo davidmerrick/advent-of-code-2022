@@ -1,24 +1,30 @@
 package io.github.davidmerrick.aoc2022.day17
 
 import io.github.davidmerrick.aoc.coordinates.LongPos
+import io.github.davidmerrick.aoc.coordinates.plus
 
-data class TetrisPiece(val value: String) {
+class TetrisPiece(value: String) {
 
-    private val rows = value.split("\n")
-    val width = rows.first().length
+    val width: Int
+    private val positions: Set<LongPos>
 
-    /**
-     * Compute the positions the piece occupies,
-     * relative to current.
-     * Note that curPos is the bottom-left position of the piece.
-     */
-    fun computePositions(curPos: LongPos): List<LongPos> {
-        return buildList {
+    init {
+        val rows = value.split("\n")
+        width = rows.first().length
+
+        // Initialize positions
+        positions = buildSet {
             rows.reversed().forEachIndexed { y, row ->
                 row.forEachIndexed { x, char ->
-                    if (char == '#') add(curPos.copy(x = curPos.x + x, y = curPos.y + y))
+                    if (char == '#') add(LongPos(x.toLong(), y.toLong()))
                 }
             }
         }
     }
+
+    /**
+     * Compute the positions the piece occupies,
+     * relative to current.
+     */
+    fun computePositions(curPos: LongPos) = positions.map { curPos + it }.toSet()
 }
