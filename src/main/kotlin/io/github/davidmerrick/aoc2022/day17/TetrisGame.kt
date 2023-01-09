@@ -24,15 +24,16 @@ class TetrisGame(private val jet: CircularList<Char>) {
 
     private var floor = 0L
 
-    val piecesHeight: Long
+    private val piecesHeight: Long
         get() = ((table.asSequence().filter { it.value }.maxOfOrNull { it.row } ?: floor) + 1)
 
-    fun dropPieces(n: Long) {
+    fun dropPieces(n: Long): Long {
         var jetIndex = 0
+        var gameState: GameState? = null
         for (i in 0 until n) {
             // Drop piece
             val piece = TetrisPieces.pieces[(i % TetrisPieces.pieces.size).toInt()]
-            val gameState = GameState(jetIndex, piece, getNormalizedBoard())
+            gameState = GameState(jetIndex, piece, getNormalizedBoard(), piecesHeight)
             if (gameState in gameStates) {
                 println("Detected a loop!")
                 break
@@ -57,7 +58,17 @@ class TetrisGame(private val jet: CircularList<Char>) {
             }
         }
 
-        (n / gameStates.size) * piecesHeight
+        // Figure out where the loop was. We'll use that list for the computation
+        val loopIndex = gameStates.indexOf(gameState)
+        val loopStates = gameStates.subList(loopIndex, gameStates.size)
+        var sum = gameStates[loopIndex - 1].height
+
+        // Add the current height n/gameStates.size times. There will be a remainder. Use the size
+        // height in that gameStates index
+        val remainingN = n - (gameStates.size - loopStates.size)
+
+        sum += (remainingN / (loopStates.size)) * loopStates.last().height + loopStates[(remainingN % (loopStates.size)).toInt()].height
+        return sum
     }
 
     /**
@@ -98,7 +109,6 @@ class TetrisGame(private val jet: CircularList<Char>) {
      */
     private fun raiseFloor(row: Long) {
         if (floor == row) return
-        println("Raising floor to $row")
         (floor..row).forEach { table.row(it).clear() }
         floor = row
     }

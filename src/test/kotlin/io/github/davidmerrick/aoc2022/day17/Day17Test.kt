@@ -9,8 +9,7 @@ internal class Day17Test {
     @Test
     fun `Example part 1`() {
         val game = TetrisGame.of(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")
-        game.dropPieces(2022)
-        game.piecesHeight - 1 shouldBe 3068
+        game.dropPieces(2022) shouldBe 3068
     }
 
     @Test
@@ -18,15 +17,14 @@ internal class Day17Test {
         val game = readText(this::class, "day17.txt")
             .let { TetrisGame.of(it) }
 
-        game.dropPieces(2022)
-        game.piecesHeight - 1 shouldBe 3227
+        game.dropPieces(2022) shouldBe 3227
     }
 
     @Test
     fun `Example part 2`() {
         val game = TetrisGame.of(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")
-        game.dropPieces(1_000_000_000_000)
-        game.piecesHeight - 1 shouldBe 1_514_285_714_288
+        val piecesHeight = game.dropPieces(1_000_000_000_000)
+        piecesHeight shouldBe 1_514_285_714_288
     }
 
     @Test
@@ -34,7 +32,6 @@ internal class Day17Test {
         val game = readText(this::class, "day17.txt")
             .let { TetrisGame.of(it) }
 
-        game.dropPieces(1_000_000_000_000)
-        println(game.piecesHeight - 1)
+        println(game.dropPieces(1_000_000_000_000))
     }
 }
