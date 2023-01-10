@@ -1,6 +1,7 @@
 package io.github.davidmerrick.aoc2022.day14
 
 import com.google.common.collect.HashBasedTable
+import io.github.davidmerrick.aoc.coordinates.IntPos
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.coordinates.Range
 import io.github.davidmerrick.aoc.guava.asSequence
@@ -13,20 +14,20 @@ import io.github.davidmerrick.aoc2022.day14.SpaceType.ROCK
 import io.github.davidmerrick.aoc2022.day14.SpaceType.SAND
 
 
-val sandEntryPoint = Pos(500, 0)
+val sandEntryPoint = IntPos(500, 0)
 
 class SandGrid(private val table: HashBasedTable<Int, Int, SpaceType>) {
 
     // Flips to false when sand falls off until infinity
     private var canPourSand = true
     fun print(): String {
-        return table.print {
+        return table.print({
             when (it) {
                 SAND -> "o"
                 ROCK -> "#"
                 else -> "."
             }
-        }
+        })
     }
 
     /**
@@ -61,7 +62,7 @@ class SandGrid(private val table: HashBasedTable<Int, Int, SpaceType>) {
      * If the sand should come to rest, returns the current position
      * If the sand falls into the ether, returns null
      */
-    private fun nextSandPos(sandPos: Pos): Pos? {
+    private fun nextSandPos(sandPos: IntPos): IntPos? {
         listOf(
             sandPos.copy(y = sandPos.y + 1),
             sandPos.copy(x = sandPos.x - 1, y = sandPos.y + 1),
@@ -87,7 +88,7 @@ class SandGrid(private val table: HashBasedTable<Int, Int, SpaceType>) {
         }
 
         private fun parseRanges(line: String) = line.split(" -> ")
-            .map { Pos.of(it) }
+            .map { IntPos.of(it) }
             .windowed(2)
             .map { Range(it.first(), it.last()) }
 
@@ -95,12 +96,12 @@ class SandGrid(private val table: HashBasedTable<Int, Int, SpaceType>) {
          * Gets the range of table to fill
          * with a buffer
          */
-        private fun getFillRange(positions: List<Pos>): Range {
-            val minPos = Pos(
+        private fun getFillRange(positions: List<IntPos>): Range {
+            val minPos = IntPos(
                 positions.minOf { it.x } - 1,
                 positions.minOf { it.y } - 1
             )
-            val maxPos = Pos(
+            val maxPos = IntPos(
                 positions.maxOf { it.x } + 1,
                 positions.maxOf { it.y } + 1
             )

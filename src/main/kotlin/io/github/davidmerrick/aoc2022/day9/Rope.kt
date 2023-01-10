@@ -1,17 +1,16 @@
 package io.github.davidmerrick.aoc2022.day9
 
 import com.google.common.collect.HashBasedTable
+import io.github.davidmerrick.aoc.coordinates.IntPos
 import io.github.davidmerrick.aoc.coordinates.Move
-import io.github.davidmerrick.aoc.coordinates.Pos
-import io.github.davidmerrick.aoc.coordinates.chebyshevDistance
 import io.github.davidmerrick.aoc.coordinates.plus
 import io.github.davidmerrick.aoc.guava.fill
 import io.github.davidmerrick.aoc.guava.print
 
 class Rope(segmentCount: Int = 2) {
 
-    private val visited = mutableSetOf(Pos(0, 0))
-    private val segments = MutableList(segmentCount) { Pos(0, 0) }
+    private val visited = mutableSetOf(IntPos(0, 0))
+    private val segments = MutableList(segmentCount) { IntPos(0, 0) }
 
     val visitedCount
         get() = visited.size
@@ -26,7 +25,7 @@ class Rope(segmentCount: Int = 2) {
         }
     }
 
-    private fun computeTailMove(headPos: Pos, tailPos: Pos): Move {
+    private fun computeTailMove(headPos: IntPos, tailPos: IntPos): Move {
         return if (tailPos.chebyshevDistance(headPos) > 1) {
             Move(
                 (headPos.x - tailPos.x).coerceIn(-1, 1),

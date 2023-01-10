@@ -1,7 +1,6 @@
 package io.github.davidmerrick.aoc2022.day17
 
 import io.github.davidmerrick.aoc.coordinates.LongPos
-import io.github.davidmerrick.aoc.coordinates.Pos
 import io.kotlintest.matchers.collections.shouldContainAll
 import io.kotlintest.shouldBe
 import org.junit.jupiter.api.Test
@@ -45,11 +44,11 @@ internal class TetrisPieceTest {
         val positions = TetrisPiece(".#.\n###\n.#.").computePositions(LongPos(0, 0))
         positions.size shouldBe 5
         positions.shouldContainAll(
-            Pos(1, 0),
-            Pos(0, 1),
-            Pos(1, 1),
-            Pos(2, 1),
-            Pos(1, 2),
+            LongPos(1, 0),
+            LongPos(0, 1),
+            LongPos(1, 1),
+            LongPos(2, 1),
+            LongPos(1, 2),
         )
     }
 }

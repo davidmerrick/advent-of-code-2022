@@ -1,6 +1,7 @@
 package io.github.davidmerrick.aoc2022.day14
 
 import com.google.common.collect.HashBasedTable
+import io.github.davidmerrick.aoc.coordinates.IntPos
 import io.github.davidmerrick.aoc.coordinates.Pos
 import io.github.davidmerrick.aoc.coordinates.Range
 import io.github.davidmerrick.aoc.guava.asSequence
@@ -13,7 +14,7 @@ import io.github.davidmerrick.aoc2022.day14.SpaceType.ROCK
 import io.github.davidmerrick.aoc2022.day14.SpaceType.SAND
 
 class SandGridPart2(
-    rockPositions: List<Pos>,
+    rockPositions: List<IntPos>,
     floorModifier: Int?
 ) {
     private val table: HashBasedTable<Int, Int, SpaceType> = HashBasedTable.create()
@@ -21,7 +22,7 @@ class SandGridPart2(
 
     init {
         rockPositions.forEach { table.put(it, ROCK) }
-        floor = floorModifier?.let { rockPositions.maxOf(Pos::y) + it }
+        floor = floorModifier?.let { rockPositions.maxOf(IntPos::y) + it }
     }
 
     // Flips to false when sand falls off until infinity
@@ -31,13 +32,13 @@ class SandGridPart2(
 
     fun print(): String {
         padTable()
-        return table.print {
+        return table.print({
             when (it) {
                 SAND -> "o"
                 ROCK -> "#"
                 else -> "."
             }
-        }
+        })
     }
 
     /**
@@ -69,7 +70,7 @@ class SandGridPart2(
      * If the sand should come to rest, returns the current position
      * If the sand falls into the ether, returns null
      */
-    private fun nextSandPos(sandPos: Pos): Pos {
+    private fun nextSandPos(sandPos: IntPos): IntPos {
         return listOf(
             sandPos.copy(y = sandPos.y + 1),
             sandPos.copy(x = sandPos.x - 1, y = sandPos.y + 1),
@@ -77,7 +78,7 @@ class SandGridPart2(
         ).firstOrNull { get(it) == AIR } ?: sandPos
     }
 
-    private fun get(pos: Pos): SpaceType {
+    private fun get(pos: IntPos): SpaceType {
         floor?.let {
             if (pos.y >= it) return ROCK
         }
@@ -88,11 +89,11 @@ class SandGridPart2(
      * Pads the table with air so it can be printed
      */
     private fun padTable() {
-        val minPos = Pos(
+        val minPos = IntPos(
             table.asSequence().minOf { it.column } - 1,
             table.asSequence().minOf { it.row } - 1
         )
-        val maxPos = Pos(
+        val maxPos = IntPos(
             table.asSequence().maxOf { it.column } + 1,
             table.asSequence().maxOf { it.row } + 1
         )
@@ -110,7 +111,7 @@ class SandGridPart2(
         }
 
         private fun parseRanges(line: String) = line.split(" -> ")
-            .map { Pos.of(it) }
+            .map { IntPos.of(it) }
             .windowed(2)
             .map { Range(it.first(), it.last()) }
     }
