@@ -61,13 +61,20 @@ class TetrisGame(private val jet: CircularList<Char>) {
         // Figure out where the loop was. We'll use that list for the computation
         val loopIndex = gameStates.indexOf(gameState)
         val loopStates = gameStates.subList(loopIndex, gameStates.size)
-        var sum = gameStates[loopIndex - 1].height
+        val initialHeight = gameStates[loopIndex - 1].height
+        var sum = initialHeight
+
+        // Augment the height
+        loopStates.forEachIndexed { index, item ->
+            item.height = item.height - initialHeight
+            loopStates[index] = item
+        }
 
         // Add the current height n/gameStates.size times. There will be a remainder. Use the size
         // height in that gameStates index
         val remainingN = n - (gameStates.size - loopStates.size)
 
-        sum += (remainingN / (loopStates.size)) * loopStates.last().height + loopStates[(remainingN % (loopStates.size)).toInt()].height
+        sum += (remainingN / (loopStates.size)) * loopStates.last().height + loopStates[(remainingN % (loopStates.size)).toInt()].height - 1
         return sum
     }
 

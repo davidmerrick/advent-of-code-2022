@@ -6,7 +6,7 @@ data class GameState(
     val jetIndex: Int,
     val piece: TetrisPiece,
     val board: Set<LongPos>,
-    val height: Long
+    var height: Long
 ) {
     override fun equals(other: Any?): Boolean {
         if (other !is GameState) return false
